@@ -2,20 +2,21 @@ package com.example.android.krasnovdz5
 
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
+import android.os.Bundle
 import android.support.design.widget.TabLayout
-import android.support.v7.app.AppCompatActivity
-
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentPagerAdapter
-import android.os.Bundle
+import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
-import android.view.*
+import android.view.Gravity
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
 import android.widget.PopupWindow
 import android.widget.Toast
-
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_main.view.*
 import kotlinx.android.synthetic.main.popup_window.*
@@ -25,7 +26,6 @@ class MainActivity : AppCompatActivity() {
     private var mSectionsPagerAdapter: SectionsPagerAdapter? = null
     private lateinit var databaseHelper: DatabaseHelper
     private lateinit var db: SQLiteDatabase
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -74,15 +74,19 @@ class MainActivity : AppCompatActivity() {
 
     class PlaceholderFragment : Fragment() {
         private lateinit var todoCursor: Cursor
+        private lateinit var adapter: TodosAdapter
         override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-            if (arguments.getInt(ARGUMENT_PAGE_NUMBER) == 0) {
-                todoCursor = db.rawQuery("SELECT * FROM todos WHERE active=?", arrayOf("active"))
-            } else if (arguments.getInt(ARGUMENT_PAGE_NUMBER) == 1) {
-                todoCursor = db.rawQuery("SELECT * FROM todos WHERE active=?", arrayOf("not_active"))
-            }
             val rootView = inflater.inflate(R.layout.fragment_main, container, false)
             rootView.recycler_view.layoutManager = LinearLayoutManager(container!!.context, LinearLayoutManager.VERTICAL, false)
-            rootView.recycler_view.adapter = TodosAdapter(todoCursor)
+            if (arguments.getInt(ARGUMENT_PAGE_NUMBER) == 0) {
+                todoCursor = db.rawQuery("SELECT * FROM todos WHERE active=?", arrayOf("active"))
+                adapter = TodosAdapter(container.context, todoCursor, true)
+                rootView.recycler_view.adapter = adapter
+            } else if (arguments.getInt(ARGUMENT_PAGE_NUMBER) == 1) {
+                todoCursor = db.rawQuery("SELECT * FROM todos WHERE active=?", arrayOf("not_active"))
+                adapter = TodosAdapter(container.context, todoCursor, false)
+                rootView.recycler_view.adapter = adapter
+            }
             return rootView
         }
 
